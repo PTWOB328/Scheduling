@@ -22,12 +22,14 @@ import { format } from 'date-fns'
 
 const localizer = momentLocalizer(moment)
 
+type EventType = 'b-2' | 'ob2' | 'ob3' | 'local' | 'maddog' | 'wst'
+
 interface Event {
   id: number
   title: string
   start: Date
   end: Date
-  event_type: 'flight' | 'simulator'
+  event_type: EventType
   status: 'scheduled' | 'effective' | 'cancelled'
 }
 
@@ -70,17 +72,22 @@ const Schedule: React.FC = () => {
       title: '',
       start,
       end,
-      event_type: 'flight',
+      event_type: 'b-2',
       status: 'scheduled',
     })
     setOpenDialog(true)
   }
 
   const eventStyleGetter = (event: Event) => {
-    let backgroundColor = '#3174ad'
-    if (event.event_type === 'simulator') {
-      backgroundColor = '#7cb342'
+    const colorMap: Record<EventType, string> = {
+      'b-2': '#3174ad',
+      'ob2': '#1976d2',
+      'ob3': '#1565c0',
+      'local': '#7cb342',
+      'maddog': '#f57c00',
+      'wst': '#9c27b0',
     }
+    let backgroundColor = colorMap[event.event_type] || '#3174ad'
     if (event.status === 'cancelled') {
       backgroundColor = '#d32f2f'
     }
@@ -229,9 +236,13 @@ const EventDialog: React.FC<EventDialogProps> = ({ event, open, onClose, onSave 
         />
         <FormControl fullWidth margin="normal">
           <InputLabel>Event Type</InputLabel>
-          <Select value={eventType} onChange={(e) => setEventType(e.target.value as 'flight' | 'simulator')}>
-            <MenuItem value="flight">Flight</MenuItem>
-            <MenuItem value="simulator">Simulator</MenuItem>
+          <Select value={eventType} onChange={(e) => setEventType(e.target.value as EventType)}>
+            <MenuItem value="b-2">B-2</MenuItem>
+            <MenuItem value="ob2">OB2</MenuItem>
+            <MenuItem value="ob3">OB3</MenuItem>
+            <MenuItem value="local">Local</MenuItem>
+            <MenuItem value="maddog">Maddog</MenuItem>
+            <MenuItem value="wst">WST</MenuItem>
           </Select>
         </FormControl>
       </DialogContent>

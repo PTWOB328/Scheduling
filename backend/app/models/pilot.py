@@ -14,6 +14,10 @@ class Pilot(Base):
     qualifications = Column(JSON, default=list)  # List of qualification types
     availability = Column(JSON, default=dict)  # Availability schedule
     time_off = Column(JSON, default=list)  # List of date ranges for time off
+    # Flying requirements
+    b2_requirement = Column(Integer, default=0)  # Required B-2 flights
+    t38_requirement = Column(Integer, default=0)  # Required T-38 flights
+    wst_requirement = Column(Integer, default=0)  # Required WST flights
     notes = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True)
     

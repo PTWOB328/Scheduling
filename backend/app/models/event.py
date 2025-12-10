@@ -6,8 +6,12 @@ from ..core.database import Base
 
 
 class EventType(str, enum.Enum):
-    FLIGHT = "flight"
-    SIMULATOR = "simulator"
+    B2 = "b-2"
+    OB2 = "ob2"
+    OB3 = "ob3"
+    LOCAL = "local"
+    MADDOG = "maddog"
+    WST = "wst"
 
 
 class EventStatus(str, enum.Enum):

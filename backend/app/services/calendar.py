@@ -1,5 +1,5 @@
 from icalendar import Calendar, Event as ICalEvent
-from typing import List
+from typing import List, Dict
 from datetime import datetime
 from sqlalchemy.orm import Session
 from ..models.event import Event, EventAssignment

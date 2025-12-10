@@ -1,12 +1,12 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from datetime import datetime
 from ..core.database import get_db
 from ..core.dependencies import get_current_active_user, require_role
 from ..models.user import User, UserRole
 from ..models.event import Event, EventAssignment, EventStatus
-from ..schemas.event import EventCreate, EventUpdate, EventResponse, EventAssignmentCreate
+from ..schemas.event import EventCreate, EventUpdate, EventResponse, EventAssignmentCreate, EventAssignmentResponse
 
 router = APIRouter(prefix="/api/events", tags=["events"])
 
@@ -30,7 +30,7 @@ def get_events(
     if event_type:
         query = query.filter(Event.event_type == event_type)
     
-    events = query.order_by(Event.start_time).offset(skip).limit(limit).all()
+    events = query.options(joinedload(Event.assignments)).order_by(Event.start_time).offset(skip).limit(limit).all()
     return events
 
 
@@ -40,7 +40,7 @@ def get_event(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    event = db.query(Event).filter(Event.id == event_id).first()
+    event = db.query(Event).options(joinedload(Event.assignments)).filter(Event.id == event_id).first()
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     return event

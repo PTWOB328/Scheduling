@@ -25,6 +25,9 @@ interface Pilot {
   call_sign: string | null
   rank: string | null
   qualifications: string[]
+  b2_requirement: number
+  t38_requirement: number
+  wst_requirement: number
   is_active: boolean
 }
 
@@ -83,6 +86,9 @@ const Pilots: React.FC = () => {
               <TableCell>Call Sign</TableCell>
               <TableCell>Rank</TableCell>
               <TableCell>Qualifications</TableCell>
+              <TableCell>B-2 Req</TableCell>
+              <TableCell>T-38 Req</TableCell>
+              <TableCell>WST Req</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -93,6 +99,9 @@ const Pilots: React.FC = () => {
                 <TableCell>{pilot.call_sign || 'N/A'}</TableCell>
                 <TableCell>{pilot.rank || 'N/A'}</TableCell>
                 <TableCell>{pilot.qualifications.join(', ') || 'None'}</TableCell>
+                <TableCell>{pilot.b2_requirement || 0}</TableCell>
+                <TableCell>{pilot.t38_requirement || 0}</TableCell>
+                <TableCell>{pilot.wst_requirement || 0}</TableCell>
                 <TableCell>{pilot.is_active ? 'Active' : 'Inactive'}</TableCell>
                 <TableCell>
                   <IconButton size="small" onClick={() => handleEdit(pilot)}>
@@ -130,9 +139,28 @@ interface PilotDialogProps {
 }
 
 const PilotDialog: React.FC<PilotDialogProps> = ({ pilot, open, onClose, onSave }) => {
-  const [callSign, setCallSign] = useState(pilot?.call_sign || '')
-  const [rank, setRank] = useState(pilot?.rank || '')
+  const [callSign, setCallSign] = useState('')
+  const [rank, setRank] = useState('')
+  const [b2Requirement, setB2Requirement] = useState(0)
+  const [t38Requirement, setT38Requirement] = useState(0)
+  const [wstRequirement, setWstRequirement] = useState(0)
   const [loading, setLoading] = useState(false)
+
+  React.useEffect(() => {
+    if (pilot) {
+      setCallSign(pilot.call_sign || '')
+      setRank(pilot.rank || '')
+      setB2Requirement(pilot.b2_requirement || 0)
+      setT38Requirement(pilot.t38_requirement || 0)
+      setWstRequirement(pilot.wst_requirement || 0)
+    } else {
+      setCallSign('')
+      setRank('')
+      setB2Requirement(0)
+      setT38Requirement(0)
+      setWstRequirement(0)
+    }
+  }, [pilot, open])
 
   const handleSave = async () => {
     setLoading(true)
@@ -141,6 +169,9 @@ const PilotDialog: React.FC<PilotDialogProps> = ({ pilot, open, onClose, onSave 
         call_sign: callSign,
         rank: rank,
         qualifications: [],
+        b2_requirement: b2Requirement,
+        t38_requirement: t38Requirement,
+        wst_requirement: wstRequirement,
       }
       if (pilot?.id) {
         await pilotService.update(pilot.id, pilotData)
@@ -173,6 +204,33 @@ const PilotDialog: React.FC<PilotDialogProps> = ({ pilot, open, onClose, onSave 
           value={rank}
           onChange={(e) => setRank(e.target.value)}
           margin="normal"
+        />
+        <TextField
+          fullWidth
+          label="B-2 Requirement"
+          type="number"
+          value={b2Requirement}
+          onChange={(e) => setB2Requirement(parseInt(e.target.value) || 0)}
+          margin="normal"
+          inputProps={{ min: 0 }}
+        />
+        <TextField
+          fullWidth
+          label="T-38 Requirement"
+          type="number"
+          value={t38Requirement}
+          onChange={(e) => setT38Requirement(parseInt(e.target.value) || 0)}
+          margin="normal"
+          inputProps={{ min: 0 }}
+        />
+        <TextField
+          fullWidth
+          label="WST Requirement"
+          type="number"
+          value={wstRequirement}
+          onChange={(e) => setWstRequirement(parseInt(e.target.value) || 0)}
+          margin="normal"
+          inputProps={{ min: 0 }}
         />
       </DialogContent>
       <DialogActions>

@@ -16,13 +16,20 @@ import { Download } from '@mui/icons-material'
 import { eventService, pilotService } from '../services/api'
 import { format } from 'date-fns'
 
+interface EventAssignment {
+  id: number
+  pilot_id: number
+  position: string
+}
+
 interface Event {
   id: number
   title: string
   start_time: string
   end_time: string
-  event_type: 'flight' | 'simulator'
+  event_type: 'b-2' | 'ob2' | 'ob3' | 'local' | 'maddog' | 'wst'
   status: 'scheduled' | 'effective' | 'cancelled'
+  assignments?: EventAssignment[]
 }
 
 interface Pilot {
@@ -65,16 +72,42 @@ const Reports: React.FC = () => {
   }
 
   const generateReport = () => {
-    // Count events per pilot
-    const pilotStats: Record<number, { flights: number; sims: number }> = {}
+    // Count events per pilot by type
+    // T-38s: Local = 1, OB2 = 2, OB3 = 3
+    const pilotStats: Record<number, { 
+      b2: number
+      t38: number  // Total T-38 flights (Local + OB2*2 + OB3*3)
+      wst: number
+    }> = {}
+    
     pilots.forEach((pilot) => {
-      pilotStats[pilot.id] = { flights: 0, sims: 0 }
+      pilotStats[pilot.id] = { 
+        b2: 0,
+        t38: 0,
+        wst: 0
+      }
     })
 
     events.forEach((event) => {
-      if (event.status === 'effective') {
-        // In a real implementation, you'd get assignments from the event
-        // For now, this is a placeholder
+      if (event.status === 'effective' && event.assignments) {
+        event.assignments.forEach((assignment) => {
+          const pilotId = assignment.pilot_id
+          if (pilotStats[pilotId]) {
+            // Count by event type
+            if (event.event_type === 'b-2') {
+              pilotStats[pilotId].b2++
+            } else if (event.event_type === 'local') {
+              pilotStats[pilotId].t38 += 1  // Local = 1 T-38
+            } else if (event.event_type === 'ob2') {
+              pilotStats[pilotId].t38 += 2  // OB2 = 2 T-38s
+            } else if (event.event_type === 'ob3') {
+              pilotStats[pilotId].t38 += 3  // OB3 = 3 T-38s
+            } else if (event.event_type === 'wst') {
+              pilotStats[pilotId].wst++
+            }
+            // Maddog events are not counted
+          }
+        })
       }
     })
 
@@ -84,11 +117,11 @@ const Reports: React.FC = () => {
   const handleExport = () => {
     const report = generateReport()
     const csv = [
-      'Pilot,Flights,Simulators',
-      ...pilots.map(
-        (pilot) =>
-          `${pilot.call_sign || `Pilot ${pilot.id}`},${report[pilot.id]?.flights || 0},${report[pilot.id]?.sims || 0}`
-      ),
+      'Pilot,B-2,T-38,WST',
+      ...pilots.map((pilot) => {
+        const stats = report[pilot.id] || { b2: 0, t38: 0, wst: 0 }
+        return `${pilot.call_sign || `Pilot ${pilot.id}`},${stats.b2},${stats.t38},${stats.wst}`
+      }),
     ].join('\n')
 
     const blob = new Blob([csv], { type: 'text/csv' })
@@ -134,20 +167,20 @@ const Reports: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell>Pilot</TableCell>
-              <TableCell>Flights</TableCell>
-              <TableCell>Simulators</TableCell>
-              <TableCell>Total Events</TableCell>
+              <TableCell>B-2</TableCell>
+              <TableCell>T-38</TableCell>
+              <TableCell>WST</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {pilots.map((pilot) => {
-              const stats = generateReport()[pilot.id] || { flights: 0, sims: 0 }
+              const stats = generateReport()[pilot.id] || { b2: 0, t38: 0, wst: 0 }
               return (
                 <TableRow key={pilot.id}>
                   <TableCell>{pilot.call_sign || `Pilot ${pilot.id}`}</TableCell>
-                  <TableCell>{stats.flights}</TableCell>
-                  <TableCell>{stats.sims}</TableCell>
-                  <TableCell>{stats.flights + stats.sims}</TableCell>
+                  <TableCell>{stats.b2}</TableCell>
+                  <TableCell>{stats.t38}</TableCell>
+                  <TableCell>{stats.wst}</TableCell>
                 </TableRow>
               )
             })}

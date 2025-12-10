@@ -9,6 +9,15 @@ class EventAssignmentCreate(BaseModel):
     position: str
 
 
+class EventAssignmentResponse(BaseModel):
+    id: int
+    pilot_id: int
+    position: str
+    
+    class Config:
+        from_attributes = True
+
+
 class EventCreate(BaseModel):
     event_type: EventType
     title: str
@@ -45,6 +54,7 @@ class EventResponse(BaseModel):
     notes: Optional[str]
     created_at: datetime
     updated_at: datetime
+    assignments: List[EventAssignmentResponse] = []
 
     class Config:
         from_attributes = True

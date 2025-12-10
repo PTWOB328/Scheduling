@@ -1,6 +1,6 @@
 from .user import UserCreate, UserResponse, Token, Login
 from .pilot import PilotCreate, PilotUpdate, PilotResponse
-from .event import EventCreate, EventUpdate, EventResponse, EventAssignmentCreate
+from .event import EventCreate, EventUpdate, EventResponse, EventAssignmentCreate, EventAssignmentResponse
 from .aircraft import AircraftCreate, AircraftResponse
 from .simulator import SimulatorCreate, SimulatorResponse
 from .currency import CurrencyRecordCreate, CurrencyRecordResponse
@@ -18,6 +18,7 @@ __all__ = [
     "EventUpdate",
     "EventResponse",
     "EventAssignmentCreate",
+    "EventAssignmentResponse",
     "AircraftCreate",
     "AircraftResponse",
     "SimulatorCreate",

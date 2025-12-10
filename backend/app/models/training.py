@@ -22,9 +22,6 @@ class TrainingRequirement(Base):
     rules = Column(JSON, default=dict)  # Flexible rules configuration
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # Relationships
-    pilot_statuses = relationship("PilotStatus", back_populates="requirement")
 
 
 class PilotStatus(Base):
@@ -43,4 +40,3 @@ class PilotStatus(Base):
     
     # Relationships
     pilot = relationship("Pilot", back_populates="pilot_statuses")
-    requirement = relationship("TrainingRequirement", back_populates="pilot_statuses")
